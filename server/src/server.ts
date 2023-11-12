@@ -1,31 +1,21 @@
-/* --------------------------------------------------------------------------------------------
- * Copyright (c) Microsoft Corporation. All rights reserved.
- * Licensed under the MIT License. See License.txt in the project root for license information.
- * ------------------------------------------------------------------------------------------ */
+// import * as path from "path";
 import {
-  createConnection,
-  TextDocuments,
-  Diagnostic,
-  DiagnosticSeverity,
-  ProposedFeatures,
-  InitializeParams,
-  DidChangeConfigurationNotification,
-  CompletionItem,
-  CompletionItemKind,
-  TextDocumentPositionParams,
-  TextDocumentSyncKind,
-  InitializeResult,
-  TextEdit,
-  SemanticTokensRequest,
-  SemanticTokenModifiers,
-  SemanticTokenTypes,
-  SemanticTokensParams,
-  SemanticTokensLegend,
   CancellationToken,
+  createConnection,
+  Diagnostic,
+  DidChangeConfigurationNotification,
+  InitializeParams,
+  InitializeResult,
+  ProposedFeatures,
   SemanticTokens,
+  SemanticTokensLegend,
+  SemanticTokensParams,
   TextDocumentIdentifier,
-  uinteger,
+  TextDocuments,
+  TextDocumentSyncKind,
+  TextEdit,
 } from "vscode-languageserver/node";
+import { TextDocument } from "vscode-languageserver-textdocument";
 
 import Parser = require("web-tree-sitter");
 
@@ -33,16 +23,45 @@ let parser: Parser | undefined;
 
 Parser.init()
   .then(() => {
-    return Parser.Language.load(
-      "/Users/hendrikkao/Projects/lsp-sample/server/out/tree-sitter-nql.wasm",
-    );
+    return Parser.Language.load(__dirname + "/tree-sitter-nql.wasm");
   })
   .then((lang) => {
     parser = new Parser();
     parser.setLanguage(lang);
   });
 
-import { TextDocument } from "vscode-languageserver-textdocument";
+const tokenTypes = [
+  "constant",
+  "number",
+  "string",
+  "strong",
+  "variable",
+  "type",
+  "other",
+  "function",
+  "property",
+  "boolean",
+  "control",
+] as const;
+
+const tokenModifiers = ["declaration", "readonly"] as const;
+
+const tokenTypeMap: Record<string, (typeof tokenTypes)[number]> = {
+  boolean: "boolean",
+  byte: "number",
+  date_time: "number",
+  date: "number",
+  duration: "number",
+  enum: "strong",
+  float: "number",
+  int: "number",
+  string: "string",
+  table: "type",
+  aggregate_function: "function",
+  field_name: "variable",
+  field_property: "property",
+  aggregate_field: "property",
+};
 
 // Create a simple text document manager.
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
@@ -51,7 +70,7 @@ let hasConfigurationCapability = false;
 let hasWorkspaceFolderCapability = false;
 let hasDiagnosticRelatedInformationCapability = false;
 
-// The example settings
+// The settings
 interface ISettings {}
 
 // The global settings, used when the `workspace/configuration` request is not supported by the client.
@@ -76,6 +95,7 @@ function getDocumentSettings(resource: string): Thenable<ISettings> {
       scopeUri: resource,
       section: "NQL",
     });
+
     documentSettings.set(resource, result);
   }
 
@@ -86,41 +106,6 @@ function getDocumentSettings(resource: string): Thenable<ISettings> {
 // Also include all preview / proposed LSP features.
 const connection = createConnection(ProposedFeatures.all);
 
-const tokenTypes = [
-  "constant",
-  "number",
-  "string",
-  "strong",
-  "variable",
-  "type",
-  "other",
-  // Custom
-  "function",
-  "property",
-  "boolean",
-  "control",
-] as const;
-
-const tokenModifiers = ["declaration", "readonly"] as const;
-
-const tokenTypeMap: Record<string, (typeof tokenTypes)[number]> = {
-  boolean: "boolean",
-  byte: "number",
-  date_time: "number",
-  date: "number",
-  duration: "number",
-  enum: "strong",
-  float: "number",
-  int: "number",
-  string: "string",
-  table: "type",
-  // Custom
-  aggregate_function: "function",
-  field_name: "variable",
-  field_property: "property",
-  aggregate_field: "property",
-};
-
 connection.onInitialize((params: InitializeParams) => {
   const capabilities = params.capabilities;
 
@@ -129,9 +114,11 @@ connection.onInitialize((params: InitializeParams) => {
   hasConfigurationCapability = !!(
     capabilities.workspace && !!capabilities.workspace.configuration
   );
+
   hasWorkspaceFolderCapability = !!(
     capabilities.workspace && !!capabilities.workspace.workspaceFolders
   );
+
   hasDiagnosticRelatedInformationCapability = !!(
     capabilities.textDocument &&
     capabilities.textDocument.publishDiagnostics &&
@@ -141,10 +128,6 @@ connection.onInitialize((params: InitializeParams) => {
   const result: InitializeResult = {
     capabilities: {
       textDocumentSync: TextDocumentSyncKind.Incremental,
-      // Tell the client that this server supports code completion.
-      completionProvider: {
-        resolveProvider: true,
-      },
       documentFormattingProvider: true,
       semanticTokensProvider: {
         documentSelector: [{ language: "NQL" }],
@@ -187,12 +170,6 @@ connection.onInitialized(() => {
   connection.languages.semanticTokens.on(
     (params: SemanticTokensParams, token) => {
       const provider = new TokenAdapter();
-
-      const result: SemanticTokens = {
-        data: [],
-      };
-
-      // return result;
       return provider.provideDocumentSemanticTokens(params.textDocument, token);
     },
   );
@@ -316,7 +293,6 @@ function getTokens(nqlString: string): IToken[] {
 
 function applyModifiers(
   availableModifiers: typeof tokenModifiers,
-  // modifiersToApply: (typeof tokenModifiers)[number][],
   modifiersToApply: string[],
 ) {
   let result = 0;
@@ -342,64 +318,17 @@ export class TokenAdapter {
     document: TextDocumentIdentifier,
     token: CancellationToken,
   ): SemanticTokens {
-    const d = documents.get(document.uri);
-    const c = d?.getText();
+    const textDocument = documents.get(document.uri);
+    const content = textDocument?.getText();
 
-    if (!c) {
+    if (!content) {
       return {
         data: [],
         resultId: undefined,
       };
     }
 
-    const tokens = getTokens(c);
-
-    /**
-     * How to encode tokens
-     *
-     * Here is an example for encoding a file with 3 tokens in a uint32 array
-     *
-     * ```
-     * { line: 2, startChar:  5, length: 3, tokenType: "property",  tokenModifiers: ["private", "static"] },
-     * { line: 2, startChar: 10, length: 4, tokenType: "type",      tokenModifiers: [] },
-     * { line: 5, startChar:  2, length: 7, tokenType: "class",     tokenModifiers: [] }
-     * ```
-     *
-     * First of all, a legend must be devised. This legend must be provided up-front and capture all possible token types. For this example, we will choose the following legend which must be passed in when registering the provider:
-     *
-     * ```
-     * tokenTypes: ['property', 'type', 'class'],
-     * tokenModifiers: ['private', 'static']
-     * ```
-     *
-     * The first transformation step is to encode tokenType and tokenModifiers as integers using the legend.
-     * Token types are looked up by index, so a tokenType value of 1 means tokenTypes[1].
-     * Multiple token modifiers can be set by using bit flags,
-     * so a tokenModifier value of 3 is first viewed as binary 0b00000011,
-     * which means [tokenModifiers[0], tokenModifiers[1]] because bits 0 and 1 are set.
-     * Using this legend, the tokens now are:
-     *
-     * ```
-     * { line: 2, startChar:  5, length: 3, tokenType: 0, tokenModifiers: 3 },
-     * { line: 2, startChar: 10, length: 4, tokenType: 1, tokenModifiers: 0 },
-     * { line: 5, startChar:  2, length: 7, tokenType: 2, tokenModifiers: 0 }
-     * ```
-     *
-     * The next step is to represent each token relative to the previous token in the file. In this case, the second token is on the same line as the first token, so the startChar of the second token is made relative to the startChar of the first token, so it will be 10 - 5. The third token is on a different line than the second token, so the startChar of the third token will not be altered:
-     *
-     * ```
-     * { deltaLine: 2, deltaStartChar: 5, length: 3, tokenType: 0, tokenModifiers: 3 },
-     * { deltaLine: 0, deltaStartChar: 5, length: 4, tokenType: 1, tokenModifiers: 0 },
-     * { deltaLine: 3, deltaStartChar: 2, length: 7, tokenType: 2, tokenModifiers: 0 }
-     * ```
-     *
-     * Finally, the last step is to inline each of the 5 fields for a token in a single array, which is a memory friendly representation:
-     *
-     * ```
-     * // 1st token,  2nd token,  3rd token
-     * [  2,5,3,0,3,  0,5,4,1,0,  3,2,7,2,0 ]
-     * ```
-     */
+    const tokens = getTokens(content);
 
     let prevLine = 0;
     let prevChar = 0;
@@ -414,8 +343,6 @@ export class TokenAdapter {
           : token.startPosition.column;
 
       const tokenType = tokenTypes.indexOf(tokenTypeMap[token.type]);
-
-      // TODO: Set individual bits based on modifiers
 
       semanticTokens.push([
         lineDelta,
@@ -445,32 +372,6 @@ export class TokenAdapter {
   public releaseDocumentSemanticTokens() {}
 }
 
-// async function validateTextDocument(textDocument: TextDocument): Promise<void> {
-//   // In this simple example we get the settings for every validate run.
-//   const settings = await getDocumentSettings(textDocument.uri);
-
-//   console.log("***");
-//   console.log(settings);
-//   console.log("***");
-
-//   // Send the computed diagnostics to VSCode.
-//   connection.sendDiagnostics({ uri: textDocument.uri, diagnostics: [] });
-// }
-
-// connection.onRequest(SemanticTokensRequest.type, (params, token) => {
-//   console.log("***");
-//   console.log(SemanticTokensRequest.type);
-//   console.log("***");
-//   return null;
-// });
-
-// connection.onRequest(SemanticTokenTypes.type, (params, token) => {
-//   console.log("***");
-//   console.log(SemanticTokenTypes.type);
-//   console.log("***");
-//   return null;
-// });
-
 connection.onDidChangeConfiguration((change) => {
   if (hasConfigurationCapability) {
     // Reset all cached document settings
@@ -495,50 +396,7 @@ documents.onDidChangeContent((change) => {
 });
 
 async function validateTextDocument(textDocument: TextDocument): Promise<void> {
-  // In this simple example we get the settings for every validate run.
-  const settings = await getDocumentSettings(textDocument.uri);
-
-  connection.console.log("We received an file change event");
-  console.log("settings", settings);
-
-  // The validator creates diagnostics for all uppercase words length 2 and more
-  const text = textDocument.getText();
-  const pattern = /\b[A-Z]{2,}\b/g;
-  let m: RegExpExecArray | null;
-
-  let problems = 0;
   const diagnostics: Diagnostic[] = [];
-  while ((m = pattern.exec(text)) && problems < 100) {
-    problems++;
-    const diagnostic: Diagnostic = {
-      severity: DiagnosticSeverity.Warning,
-      range: {
-        start: textDocument.positionAt(m.index),
-        end: textDocument.positionAt(m.index + m[0].length),
-      },
-      message: `${m[0]} is all uppercase.`,
-      source: "ex",
-    };
-    if (hasDiagnosticRelatedInformationCapability) {
-      diagnostic.relatedInformation = [
-        {
-          location: {
-            uri: textDocument.uri,
-            range: Object.assign({}, diagnostic.range),
-          },
-          message: "Spelling matters",
-        },
-        {
-          location: {
-            uri: textDocument.uri,
-            range: Object.assign({}, diagnostic.range),
-          },
-          message: "Particularly for names",
-        },
-      ];
-    }
-    diagnostics.push(diagnostic);
-  }
 
   // Send the computed diagnostics to VSCode.
   connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
@@ -706,40 +564,6 @@ connection.onDocumentFormatting(async (_params): Promise<TextEdit[]> => {
 connection.onDidChangeWatchedFiles((_change) => {
   // Monitored files have change in VSCode
   connection.console.log("We received an file change event");
-});
-
-// This handler provides the initial list of the completion items.
-connection.onCompletion(
-  (_textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
-    // The pass parameter contains the position of the text document in
-    // which code complete got requested. For the example we ignore this
-    // info and always provide the same completion items.
-    return [
-      {
-        label: "TypeScript",
-        kind: CompletionItemKind.Text,
-        data: 1,
-      },
-      {
-        label: "JavaScript",
-        kind: CompletionItemKind.Text,
-        data: 2,
-      },
-    ];
-  },
-);
-
-// This handler resolves additional information for the item selected in
-// the completion list.
-connection.onCompletionResolve((item: CompletionItem): CompletionItem => {
-  if (item.data === 1) {
-    item.detail = "TypeScript details";
-    item.documentation = "TypeScript documentation";
-  } else if (item.data === 2) {
-    item.detail = "JavaScript details";
-    item.documentation = "JavaScript documentation";
-  }
-  return item;
 });
 
 // Make the text document manager listen on the connection
