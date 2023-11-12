@@ -3,7 +3,7 @@
   "description": "A language server example",
   "author": "Microsoft Corporation",
   "license": "MIT",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "repository": {
     "type": "git",
     "url": "https://github.com/Microsoft/vscode-extension-samples"
@@ -21,17 +21,26 @@
   ],
   "main": "./client/out/extension",
   "contributes": {
+    "languages": [
+      {
+        "id": "NQL",
+        "extensions": [
+          ".nql"
+        ]
+      }
+    ],
+    "grammars": [
+      {
+        "language": "NQL",
+        "scopeName": "source.NQL",
+        "path": "./syntaxes/NQL.tmGrammar.json"
+      }
+    ],
     "configuration": {
       "type": "object",
       "title": "Example configuration",
       "properties": {
-        "languageServerExample.maxNumberOfProblems": {
-          "scope": "resource",
-          "type": "number",
-          "default": 100,
-          "description": "Controls the maximum number of problems produced by the server."
-        },
-        "languageServerExample.trace.server": {
+        "NQL.trace.server": {
           "scope": "window",
           "type": "string",
           "enum": [
@@ -39,7 +48,7 @@
             "messages",
             "verbose"
           ],
-          "default": "off",
+          "default": "verbose",
           "description": "Traces the communication between VS Code and the language server."
         }
       }
