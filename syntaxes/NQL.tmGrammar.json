@@ -1,6 +1,27 @@
 {
   "scopeName": "source.NQL",
-  "patterns": [{ "include": "#summarize" }],
+  "patterns": [
+    {
+      "include": "#summarize"
+    },
+    { "include": "#asc" },
+    { "include": "#and" },
+    { "include": "#by" },
+    { "include": "#compute" },
+    { "include": "#desc" },
+    { "include": "#during" },
+    { "include": "#from" },
+    { "include": "#include" },
+    { "include": "#list" },
+    { "include": "#limit" },
+    { "include": "#on" },
+    { "include": "#or" },
+    { "include": "#sort" },
+    { "include": "#summarize" },
+    { "include": "#to" },
+    { "include": "#where" },
+    { "include": "#with" }
+  ],
   "repository": {
     "asc": { "match": "asc", "name": "keyword" },
     "and": { "match": "and", "name": "keyword" },
