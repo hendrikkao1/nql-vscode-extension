@@ -1,4 +1,3 @@
-// import * as path from "path";
 import {
   CancellationToken,
   createConnection,
@@ -22,9 +21,7 @@ import Parser = require("web-tree-sitter");
 let parser: Parser | undefined;
 
 Parser.init()
-  .then(() => {
-    return Parser.Language.load(__dirname + "/tree-sitter-nql.wasm");
-  })
+  .then(() => Parser.Language.load(__dirname + "/tree-sitter-nql.wasm"))
   .then((lang) => {
     parser = new Parser();
     parser.setLanguage(lang);
@@ -159,12 +156,6 @@ connection.onInitialized(() => {
       DidChangeConfigurationNotification.type,
       undefined,
     );
-  }
-
-  if (hasWorkspaceFolderCapability) {
-    connection.workspace.onDidChangeWorkspaceFolders((_event) => {
-      connection.console.log("Workspace folder change event received.");
-    });
   }
 
   connection.languages.semanticTokens.on(
