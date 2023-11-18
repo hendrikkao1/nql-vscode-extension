@@ -4,4 +4,4 @@ Extension to make [Nexthink query language (NQL)](https://docs.nexthink.com/plat
 
 [Try it here](https://hendrikkao1.github.io/nql-web-formatter/)
 
-**DISCLAIMER:** Please note that this extension is not developed or maintained by [Nexthink](https://www.nexthink.com). As such, it may not support the latest language features.
+**DISCLAIMER:** Please note that this extension is not developed or maintained by [Nexthink](https://www.nexthink.com). As such, it may not support all the language features.
