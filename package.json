@@ -2,9 +2,10 @@
   "name": "nql-vscode-extension",
   "displayName": "NQL (Unofficial)",
   "description": "Language support for Nexthink query language (NQL)",
+  "icon": "icon.jpg",
   "author": "Hendrik Käo",
   "license": "MIT",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "preview": true,
   "repository": {
     "type": "git",
