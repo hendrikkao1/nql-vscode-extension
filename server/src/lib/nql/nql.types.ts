@@ -1,4 +1,4 @@
-export const tokenTypes = [
+export const TokenTypes = [
   "constant",
   "number",
   "string",
@@ -12,26 +12,26 @@ export const tokenTypes = [
   "control",
 ] as const;
 
-export const tokenModifiers = ["declaration", "readonly"] as const;
+export const TokenModifiers = ["declaration", "readonly"] as const;
 
-export const tokenTypeMap: Record<string, (typeof tokenTypes)[number]> = {
+export const NQLTokenTypeToTokenTypeMap: Record<string, (typeof TokenTypes)[number]> = {
+  aggregate_field: "property",
+  aggregate_function: "function",
   boolean: "boolean",
   byte: "number",
   date_time: "number",
   date: "number",
   duration: "number",
   enum: "strong",
+  field_name: "variable",
+  field_property: "property",
   float: "number",
   int: "number",
   string: "string",
   table: "type",
-  aggregate_function: "function",
-  field_name: "variable",
-  field_property: "property",
-  aggregate_field: "property",
 };
 
-export interface INQLSematicToken {
+export interface INQLToken {
   type: string;
   text: string;
   modifiers: string[];

@@ -1,10 +1,21 @@
 import Parser = require("web-tree-sitter");
-import { INQLParserError, INQLSematicToken } from "./nql.types";
 
-export class Nql {
+import { INQLParserError, INQLToken } from "./nql.types";
+
+export class NQL {
   private _parser: Parser | null;
+  private _parserFile: string;
+  private _parserLocateFile: ((scriptName: string) => string) | undefined;
 
-  constructor() {
+  constructor({
+    parserFile,
+    parserLocateFile,
+  }: {
+    parserFile: string;
+    parserLocateFile?: (scriptName: string) => string;
+  }) {
+    this._parserFile = parserFile;
+    this._parserLocateFile = parserLocateFile;
     this._parser = null;
   }
 
@@ -13,9 +24,11 @@ export class Nql {
       return this._parser;
     }
 
-    await Parser.init();
+    await Parser.init({
+      locateFile: this._parserLocateFile,
+    });
 
-    const nql = await Parser.Language.load(__dirname + "/tree-sitter-nql.wasm");
+    const nql = await Parser.Language.load(this._parserFile);
 
     const parser = new Parser();
 
@@ -26,12 +39,12 @@ export class Nql {
     return parser;
   }
 
-  async getDocumentSemanticTokens(
-    document: string,
-  ): Promise<INQLSematicToken[]> {
+  async getTokens(
+    content: string,
+  ): Promise<INQLToken[]> {
     const parser = await this.getParser();
 
-    const tree = parser.parse(document);
+    const tree = parser.parse(content);
 
     // TODO: Improve this
     const isUserDefinedField = (node: Parser.SyntaxNode): boolean => {
@@ -61,8 +74,8 @@ export class Nql {
       return findDeclaration(tree.rootNode);
     };
 
-    const getTokens = (node: Parser.SyntaxNode): INQLSematicToken[] => {
-      const tokens: INQLSematicToken[] = [];
+    const _getTokens = (node: Parser.SyntaxNode): INQLToken[] => {
+      const tokens: INQLToken[] = [];
 
       for (const child of node.children) {
         switch (child.type) {
@@ -102,19 +115,19 @@ export class Nql {
             break;
         }
 
-        tokens.push(...getTokens(child));
+        tokens.push(..._getTokens(child));
       }
 
       return tokens;
     };
 
-    return getTokens(tree.rootNode);
+    return _getTokens(tree.rootNode);
   }
 
-  async formatDocument(document: string): Promise<string> {
+  async formatContent(content: string): Promise<string> {
     const parser = await this.getParser();
 
-    const tree = parser.parse(document);
+    const tree = parser.parse(content);
 
     const checkIfNodeHasTypeOfParent = (
       node: Parser.SyntaxNode,
@@ -227,10 +240,10 @@ export class Nql {
     return cleanFormattedDocument;
   }
 
-  async getDocumentParseErrors(document: string): Promise<INQLParserError[]> {
+  async getContentParseErrors(content: string): Promise<INQLParserError[]> {
     const parser = await this.getParser();
 
-    const tree = parser.parse(document);
+    const tree = parser.parse(content);
 
     if (!tree.rootNode.hasError()) {
       return [];

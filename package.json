@@ -1,13 +1,14 @@
 {
   "name": "nql-vscode-extension",
   "displayName": "NQL (Unofficial)",
-  "description": "Unofficial language support for Nexthink query language (NQL)",
+  "description": "Language support for Nexthink query language (NQL)",
   "author": "Hendrik Käo",
   "license": "MIT",
-  "version": "0.0.2",
+  "version": "0.0.3",
+  "preview": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/hendrikkao1/nql-web-formatter"
+    "url": "https://github.com/hendrikkao1/nql-vscode-extension"
   },
   "publisher": "hendrikkao",
   "categories": [
@@ -20,7 +21,6 @@
     "vscode": "^1.75.0"
   },
   "activationEvents": [
-    "onLanguage:plaintext",
     "onLanguage:NQL"
   ],
   "main": "./client/out/extension",
@@ -59,7 +59,7 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "npm run compile && cp ./server/src/lib/nql/tree-sitter-nql.wasm ./server/out/lib/nql",
     "compile": "tsc -b",
     "watch": "tsc -b -w",
     "lint": "eslint ./client/src ./server/src --ext .ts,.tsx",
