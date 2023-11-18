@@ -4,7 +4,7 @@
   "description": "Language support for Nexthink query language (NQL)",
   "author": "Hendrik Käo",
   "license": "MIT",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "preview": true,
   "repository": {
     "type": "git",
