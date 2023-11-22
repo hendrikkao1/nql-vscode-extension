@@ -10,9 +10,7 @@ suite("Should do highlighting", () => {
   });
 });
 
-async function testHighlighting(
-  docUri: vscode.Uri,
-) {
+async function testHighlighting(docUri: vscode.Uri) {
   await activate(docUri);
 
   // TODO: How Can we test this?

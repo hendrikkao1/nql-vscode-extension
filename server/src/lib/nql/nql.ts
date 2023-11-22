@@ -39,9 +39,7 @@ export class NQL {
     return parser;
   }
 
-  async getTokens(
-    content: string,
-  ): Promise<INQLToken[]> {
+  async getTokens(content: string): Promise<INQLToken[]> {
     const parser = await this.getParser();
 
     const tree = parser.parse(content);

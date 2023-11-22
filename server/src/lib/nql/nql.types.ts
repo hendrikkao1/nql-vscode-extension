@@ -14,7 +14,10 @@ export const TokenTypes = [
 
 export const TokenModifiers = ["declaration", "readonly"] as const;
 
-export const NQLTokenTypeToTokenTypeMap: Record<string, (typeof TokenTypes)[number]> = {
+export const NQLTokenTypeToTokenTypeMap: Record<
+  string,
+  (typeof TokenTypes)[number]
+> = {
   aggregate_field: "property",
   aggregate_function: "function",
   boolean: "boolean",

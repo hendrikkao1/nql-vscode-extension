@@ -11,7 +11,12 @@ import {
   TextEdit,
 } from "vscode-languageserver/node";
 import { TextDocument } from "vscode-languageserver-textdocument";
-import { NQL, TokenModifiers, TokenTypes, nqlTokensToVSCodeTokens } from "./lib/nql";
+import {
+  NQL,
+  TokenModifiers,
+  TokenTypes,
+  nqlTokensToVSCodeTokens,
+} from "./lib/nql";
 
 const nql = new NQL({
   parserFile: __dirname + "/lib/nql/tree-sitter-nql.wasm",
@@ -32,7 +37,7 @@ const provideDocumentSemanticTokens = async (
   }
 
   const tokens = await nql.getTokens(content);
-  const semanticTokens = nqlTokensToVSCodeTokens(tokens)
+  const semanticTokens = nqlTokensToVSCodeTokens(tokens);
 
   if (token.isCancellationRequested) {
     return {
@@ -58,7 +63,7 @@ const provideDocumentFormattingEdits = async (
     return [];
   }
 
-  const newText = await nql.formatContent(content)
+  const newText = await nql.formatContent(content);
 
   if (token.isCancellationRequested) {
     return [];
@@ -125,5 +130,3 @@ documents.listen(connection);
 
 // Listen on the connection
 connection.listen();
-
-
