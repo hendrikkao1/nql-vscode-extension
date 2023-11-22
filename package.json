@@ -1,37 +1,52 @@
 {
-  "name": "lsp-sample",
-  "description": "A language server example",
-  "author": "Microsoft Corporation",
+  "name": "nql-vscode-extension",
+  "displayName": "NQL (Unofficial)",
+  "description": "Language support for Nexthink query language (NQL)",
+  "homepage": "https://hendrikkao1.github.io/nql-web-formatter",
+  "icon": "icon.jpg",
+  "author": "Hendrik Käo",
   "license": "MIT",
-  "version": "1.0.0",
+  "version": "0.0.6",
+  "preview": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/Microsoft/vscode-extension-samples"
+    "url": "https://github.com/hendrikkao1/nql-vscode-extension"
   },
-  "publisher": "vscode-samples",
-  "categories": [],
+  "publisher": "hendrikkao",
+  "categories": [
+    "Programming Languages"
+  ],
   "keywords": [
-    "multi-root ready"
+    "NQL Nexthink"
   ],
   "engines": {
     "vscode": "^1.75.0"
   },
   "activationEvents": [
-    "onLanguage:plaintext"
+    "onLanguage:NQL"
   ],
   "main": "./client/out/extension",
   "contributes": {
+    "languages": [
+      {
+        "id": "NQL",
+        "extensions": [
+          ".nql"
+        ]
+      }
+    ],
+    "grammars": [
+      {
+        "language": "NQL",
+        "scopeName": "source.NQL",
+        "path": "./syntaxes/NQL.tmGrammar.json"
+      }
+    ],
     "configuration": {
       "type": "object",
-      "title": "Example configuration",
+      "title": "NQL language server configuration",
       "properties": {
-        "languageServerExample.maxNumberOfProblems": {
-          "scope": "resource",
-          "type": "number",
-          "default": 100,
-          "description": "Controls the maximum number of problems produced by the server."
-        },
-        "languageServerExample.trace.server": {
+        "NQL.trace.server": {
           "scope": "window",
           "type": "string",
           "enum": [
@@ -46,13 +61,14 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "npm run compile && cp ./server/src/lib/nql/tree-sitter-nql.wasm ./server/out/lib/nql",
     "compile": "tsc -b",
     "watch": "tsc -b -w",
     "lint": "eslint ./client/src ./server/src --ext .ts,.tsx",
     "postinstall": "cd client && npm install && cd ../server && npm install && cd ..",
     "format": "npx prettier . --write",
-    "test": "sh ./scripts/e2e.sh"
+    "test": "sh ./scripts/e2e.sh",
+    "pack": "npm run vscode:prepublish && vsce package"
   },
   "devDependencies": {
     "@types/mocha": "^9.1.0",
