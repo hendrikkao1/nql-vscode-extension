@@ -4,41 +4,126 @@
     {
       "include": "#summarize"
     },
-    { "include": "#asc" },
-    { "include": "#and" },
-    { "include": "#by" },
-    { "include": "#compute" },
-    { "include": "#desc" },
-    { "include": "#during" },
-    { "include": "#from" },
-    { "include": "#include" },
-    { "include": "#list" },
-    { "include": "#limit" },
-    { "include": "#on" },
-    { "include": "#or" },
-    { "include": "#sort" },
-    { "include": "#summarize" },
-    { "include": "#to" },
-    { "include": "#where" },
-    { "include": "#with" }
+    {
+      "include": "#asc"
+    },
+    {
+      "include": "#and"
+    },
+    {
+      "include": "#by"
+    },
+    {
+      "include": "#compute"
+    },
+    {
+      "include": "#desc"
+    },
+    {
+      "include": "#during"
+    },
+    {
+      "include": "#from"
+    },
+    {
+      "include": "#include"
+    },
+    {
+      "include": "#list"
+    },
+    {
+      "include": "#limit"
+    },
+    {
+      "include": "#on"
+    },
+    {
+      "include": "#or"
+    },
+    {
+      "include": "#sort"
+    },
+    {
+      "include": "#summarize"
+    },
+    {
+      "include": "#to"
+    },
+    {
+      "include": "#where"
+    },
+    {
+      "include": "#with"
+    }
   ],
   "repository": {
-    "asc": { "match": "asc", "name": "keyword" },
-    "and": { "match": "and", "name": "keyword" },
-    "by": { "match": "by", "name": "keyword" },
-    "compute": { "match": "compute", "name": "keyword.control" },
-    "desc": { "match": "desc", "name": "keyword" },
-    "during": { "match": "during past", "name": "keyword" },
-    "from": { "match": "from", "name": "keyword" },
-    "include": { "match": "include", "name": "keyword.control" },
-    "list": { "match": "list", "name": "keyword.control" },
-    "limit": { "match": "limit", "name": "keyword" },
-    "on": { "match": "on", "name": "keyword" },
-    "or": { "match": "or", "name": "keyword" },
-    "sort": { "match": "sort", "name": "keyword.control" },
-    "summarize": { "match": "summarize", "name": "keyword.control" },
-    "to": { "match": "to", "name": "keyword.control" },
-    "where": { "match": "where", "name": "keyword.control" },
-    "with": { "match": "with", "name": "keyword.control" }
+    "asc": {
+      "match": "\\basc\\b",
+      "name": "keyword"
+    },
+    "and": {
+      "match": "\\band\\b",
+      "name": "keyword"
+    },
+    "by": {
+      "match": "\\bby\\b",
+      "name": "keyword"
+    },
+    "compute": {
+      "match": "\\bcompute\\b",
+      "name": "keyword.control"
+    },
+    "desc": {
+      "match": "\\bdesc\\b",
+      "name": "keyword"
+    },
+    "during": {
+      "match": "\\bduring\\b past",
+      "name": "keyword"
+    },
+    "from": {
+      "match": "\\bfrom\\b",
+      "name": "keyword"
+    },
+    "include": {
+      "match": "\\binclude\\b",
+      "name": "keyword.control"
+    },
+    "list": {
+      "match": "\\blist\\b",
+      "name": "keyword.control"
+    },
+    "limit": {
+      "match": "\\blimit\\b",
+      "name": "keyword"
+    },
+    "on": {
+      "match": "\\bon\\b",
+      "name": "keyword"
+    },
+    "or": {
+      "match": "\\bor\\b",
+      "name": "keyword"
+    },
+    "sort": {
+      "match": "\\bsort\\b",
+      "name": "keyword.control"
+    },
+    "summarize": {
+      "match": "\\bsummarize\\b",
+      "name": "keyword.control"
+    },
+    "to": {
+      "match": "\\bto\\b",
+      "name": "keyword.control"
+    },
+    "where": {
+      "match": "\\bwhere\\b",
+      "name": "keyword.control"
+    },
+    "with": {
+      "match": "\\bwith\\b",
+      "name": "keyword.control"
+    }
   }
 }
