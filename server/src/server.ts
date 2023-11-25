@@ -1,8 +1,11 @@
 import {
   CancellationToken,
   createConnection,
+  Diagnostic,
+  DiagnosticSeverity,
   InitializeResult,
   ProposedFeatures,
+  Range,
   SemanticTokens,
   SemanticTokensParams,
   TextDocumentIdentifier,
@@ -80,8 +83,37 @@ const provideDocumentFormattingEdits = async (
   return [textEdit];
 };
 
+const valdiateDocument = async (document: TextDocument) => {
+  const content = document.getText();
+
+  const parserErrors = await nql.getContentParseErrors(content);
+
+  const diagnostics: Diagnostic[] = parserErrors.map((error) => {
+    const range = Range.create(
+      error.startPosition.row,
+      error.startPosition.column,
+      error.endPosition.row,
+      error.endPosition.column,
+    );
+    const message = `Syntax error: "${error.text}"`;
+    const severity = DiagnosticSeverity.Error;
+    const source = "NQL";
+
+    return Diagnostic.create(range, message, severity, undefined, source);
+  });
+
+  connection.sendDiagnostics({
+    uri: document.uri,
+    diagnostics,
+  });
+};
+
 // Create a simple text document manager.
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
+
+documents.onDidChangeContent((change) => {
+  valdiateDocument(change.document);
+});
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -123,6 +155,10 @@ connection.onDocumentFormatting(
   async (_params, token): Promise<TextEdit[]> =>
     provideDocumentFormattingEdits(_params.textDocument, token),
 );
+
+connection.onDidChangeConfiguration((change) => {
+  documents.all().forEach(valdiateDocument);
+});
 
 // Make the text document manager listen on the connection
 // for open, change and close text document events
