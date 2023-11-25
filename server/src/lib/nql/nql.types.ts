@@ -1,22 +1,37 @@
-export const TokenTypes = [
-  "constant",
-  "number",
-  "string",
-  "strong",
-  "variable",
-  "type",
-  "other",
-  "function",
-  "property",
-  "boolean",
-  "control",
-] as const;
+export const NQLTokenType = {
+  aggregate_field: "aggregate_field",
+  aggregate_function: "aggregate_function",
+  boolean: "boolean",
+  byte: "byte",
+  date_time: "date_time",
+  date: "date",
+  duration: "duration",
+  enum: "enum",
+  field_name: "field_name",
+  field_property: "field_property",
+  float: "float",
+  int: "int",
+  string: "string",
+  table: "table",
+} as const;
 
-export const TokenModifiers = ["declaration", "readonly"] as const;
+export const EditorTokenType = {
+  constant: "constant",
+  number: "number",
+  string: "string",
+  strong: "strong",
+  variable: "variable",
+  type: "type",
+  other: "other",
+  function: "function",
+  property: "property",
+  boolean: "boolean",
+  control: "control",
+} as const;
 
-export const NQLTokenTypeToTokenTypeMap: Record<
-  string,
-  (typeof TokenTypes)[number]
+export const NQLTokenTypeToEditorTokenTypeMap: Record<
+  (typeof NQLTokenType)[keyof typeof NQLTokenType],
+  (typeof EditorTokenType)[keyof typeof EditorTokenType]
 > = {
   aggregate_field: "property",
   aggregate_function: "function",
@@ -34,10 +49,36 @@ export const NQLTokenTypeToTokenTypeMap: Record<
   table: "type",
 };
 
+export const editorTokenTypeList = Object.keys(
+  EditorTokenType,
+) as (keyof typeof EditorTokenType)[];
+
+export const NQLTokenModifiers = {
+  defaultLibrary: "defaultLibrary",
+  readonly: "readonly",
+} as const;
+
+export const EditorTokenModifiers = {
+  readonly: "readonly",
+  defaultLibrary: "defaultLibrary",
+} as const;
+
+export const NQLTokenModifierToEditorTokenModifierMap: Record<
+  (typeof NQLTokenModifiers)[keyof typeof NQLTokenModifiers],
+  (typeof EditorTokenModifiers)[keyof typeof EditorTokenModifiers]
+> = {
+  defaultLibrary: "defaultLibrary",
+  readonly: "readonly",
+};
+
+export const editorTokenModifierList = Object.keys(
+  EditorTokenModifiers,
+) as (keyof typeof EditorTokenModifiers)[];
+
 export interface INQLToken {
-  type: string;
+  type: keyof typeof NQLTokenType;
   text: string;
-  modifiers: string[];
+  modifiers: (keyof typeof NQLTokenModifiers)[];
   startPosition: {
     row: number;
     column: number;

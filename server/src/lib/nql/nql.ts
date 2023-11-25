@@ -1,6 +1,6 @@
 import Parser = require("web-tree-sitter");
 
-import { INQLParserError, INQLToken } from "./nql.types";
+import { INQLParserError, INQLToken, NQLTokenModifiers } from "./nql.types";
 
 export class NQL {
   private _parser: Parser | null;
@@ -104,8 +104,9 @@ export class NQL {
               startPosition: child.startPosition,
               endPosition: child.endPosition,
               text: child.text,
-              // TODO: Can this be done in the parser?
-              modifiers: isUserDefinedField(child) ? [] : ["defaultLibrary"],
+              modifiers: isUserDefinedField(child)
+                ? [NQLTokenModifiers.readonly]
+                : [NQLTokenModifiers.defaultLibrary],
             });
             break;
           default:

@@ -1,13 +1,14 @@
 import {
+  editorTokenModifierList,
+  editorTokenTypeList,
   INQLToken,
-  TokenModifiers,
-  NQLTokenTypeToTokenTypeMap,
-  TokenTypes,
+  NQLTokenModifierToEditorTokenModifierMap,
+  NQLTokenTypeToEditorTokenTypeMap,
 } from "./nql.types";
 
-const getTokenModifiers = (
-  availableModifiers: string[],
-  modifiersToApply: string[],
+const getEditorTokenModifiers = (
+  availableModifiers: typeof editorTokenModifierList,
+  modifiersToApply: typeof editorTokenModifierList,
 ) => {
   let result = 0;
 
@@ -33,13 +34,13 @@ export const nqlTokensToVSCodeTokens = (nqlTokens: INQLToken[]): number[] => {
         ? token.startPosition.column - prevChar
         : token.startPosition.column;
 
-    const tokenType = TokenTypes.indexOf(
-      NQLTokenTypeToTokenTypeMap[token.type],
+    const tokenType = editorTokenTypeList.indexOf(
+      NQLTokenTypeToEditorTokenTypeMap[token.type],
     );
 
-    const modifiers = getTokenModifiers(
-      TokenModifiers as unknown as string[],
-      token.modifiers,
+    const modifiers = getEditorTokenModifiers(
+      editorTokenModifierList,
+      token.modifiers.map((m) => NQLTokenModifierToEditorTokenModifierMap[m]),
     );
 
     semanticTokens.push([

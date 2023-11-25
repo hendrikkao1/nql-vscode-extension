@@ -12,9 +12,9 @@ import {
 } from "vscode-languageserver/node";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import {
+  editorTokenModifierList,
+  editorTokenTypeList,
   NQL,
-  TokenModifiers,
-  TokenTypes,
   nqlTokensToVSCodeTokens,
 } from "./lib/nql";
 
@@ -95,8 +95,8 @@ connection.onInitialize(() => {
       semanticTokensProvider: {
         documentSelector: [{ language: "NQL" }],
         legend: {
-          tokenTypes: TokenTypes as unknown as string[],
-          tokenModifiers: TokenModifiers as unknown as string[],
+          tokenTypes: editorTokenTypeList,
+          tokenModifiers: editorTokenModifierList,
         },
         range: false,
         full: true,
