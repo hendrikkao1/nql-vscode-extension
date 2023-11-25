@@ -1,9 +1,9 @@
 {
   "name": "nql-vscode-extension",
   "displayName": "NQL (Unofficial)",
-  "description": "Language support for Nexthink query language (NQL)",
+  "description": "Language support for Nexthink Query Language (NQL)",
   "homepage": "https://hendrikkao1.github.io/nql-web-formatter",
-  "icon": "icon.jpg",
+  "icon": "assets/icon.png",
   "author": "Hendrik Käo",
   "license": "MIT",
   "version": "0.0.6",
