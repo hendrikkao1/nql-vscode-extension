@@ -1,6 +1,6 @@
 import Parser = require("web-tree-sitter");
 
-import { INQLParserError, INQLToken, NQLTokenModifiers } from "./nql.types";
+import { INQLParserError, INQLToken, NQLTokenModifier } from "./nql.types";
 
 export class NQL {
   private _parser: Parser | null;
@@ -105,8 +105,8 @@ export class NQL {
               endPosition: child.endPosition,
               text: child.text,
               modifiers: isUserDefinedField(child)
-                ? [NQLTokenModifiers.readonly]
-                : [NQLTokenModifiers.defaultLibrary],
+                ? [NQLTokenModifier.readonly]
+                : [NQLTokenModifier.defaultLibrary],
             });
             break;
           default:
@@ -215,7 +215,7 @@ export class NQL {
         case ",":
           return padRightSpace(text);
         case "pipe":
-          return text;  
+          return text;
       }
 
       if (!node.children.length) {

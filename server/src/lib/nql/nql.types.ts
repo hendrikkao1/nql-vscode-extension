@@ -53,32 +53,32 @@ export const editorTokenTypeList = Object.keys(
   EditorTokenType,
 ) as (keyof typeof EditorTokenType)[];
 
-export const NQLTokenModifiers = {
+export const NQLTokenModifier = {
   defaultLibrary: "defaultLibrary",
   readonly: "readonly",
 } as const;
 
-export const EditorTokenModifiers = {
+export const EditorTokenModifier = {
   readonly: "readonly",
   defaultLibrary: "defaultLibrary",
 } as const;
 
 export const NQLTokenModifierToEditorTokenModifierMap: Record<
-  (typeof NQLTokenModifiers)[keyof typeof NQLTokenModifiers],
-  (typeof EditorTokenModifiers)[keyof typeof EditorTokenModifiers]
+  (typeof NQLTokenModifier)[keyof typeof NQLTokenModifier],
+  (typeof EditorTokenModifier)[keyof typeof EditorTokenModifier]
 > = {
   defaultLibrary: "defaultLibrary",
   readonly: "readonly",
 };
 
 export const editorTokenModifierList = Object.keys(
-  EditorTokenModifiers,
-) as (keyof typeof EditorTokenModifiers)[];
+  EditorTokenModifier,
+) as (keyof typeof EditorTokenModifier)[];
 
 export interface INQLToken {
   type: keyof typeof NQLTokenType;
   text: string;
-  modifiers: (keyof typeof NQLTokenModifiers)[];
+  modifiers: (keyof typeof NQLTokenModifier)[];
   startPosition: {
     row: number;
     column: number;
