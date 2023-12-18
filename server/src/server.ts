@@ -26,11 +26,11 @@ const nql = new NQL({
 });
 
 const provideDocumentSemanticTokens = async (
-  document: TextDocumentIdentifier,
+  documentIdentifier: TextDocumentIdentifier,
   token: CancellationToken,
 ): Promise<SemanticTokens> => {
-  const textDocument = documents.get(document.uri);
-  const content = textDocument?.getText();
+  const document = documents.get(documentIdentifier.uri);
+  const content = document?.getText();
 
   if (!content) {
     return {
@@ -55,10 +55,17 @@ const provideDocumentSemanticTokens = async (
   };
 };
 
-const provideDocumentFormattingEdits = async (
-  documentIdentifier: TextDocumentIdentifier,
-  token: CancellationToken,
-): Promise<TextEdit[]> => {
+const provideDocumentFormattingEdits = async ({
+  documentIdentifier,
+  tabSize,
+  insertSpaces,
+  token,
+}: {
+  documentIdentifier: TextDocumentIdentifier;
+  tabSize: number;
+  insertSpaces: boolean;
+  token: CancellationToken;
+}): Promise<TextEdit[]> => {
   const document = documents.get(documentIdentifier.uri);
   const content = document?.getText();
 
@@ -66,7 +73,11 @@ const provideDocumentFormattingEdits = async (
     return [];
   }
 
-  const newText = await nql.formatContent(content);
+  const newText = await nql.formatContent({
+    content,
+    tabSize,
+    insertSpaces,
+  });
 
   if (token.isCancellationRequested) {
     return [];
@@ -152,8 +163,13 @@ connection.onInitialized(() => {
 });
 
 connection.onDocumentFormatting(
-  async (_params, token): Promise<TextEdit[]> =>
-    provideDocumentFormattingEdits(_params.textDocument, token),
+  async (params, token): Promise<TextEdit[]> =>
+    provideDocumentFormattingEdits({
+      documentIdentifier: params.textDocument,
+      tabSize: params.options.tabSize,
+      insertSpaces: params.options.insertSpaces,
+      token,
+    }),
 );
 
 connection.onDidChangeConfiguration((change) => {

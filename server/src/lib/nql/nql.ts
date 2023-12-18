@@ -123,7 +123,15 @@ export class NQL {
     return _getTokens(tree.rootNode);
   }
 
-  async formatContent(content: string): Promise<string> {
+  async formatContent({
+    content,
+    tabSize,
+    insertSpaces,
+  }: {
+    content: string;
+    tabSize: number;
+    insertSpaces: boolean;
+  }): Promise<string> {
     const parser = await this.getParser();
 
     const tree = parser.parse(content);
@@ -142,6 +150,8 @@ export class NQL {
 
       return checkIfNodeHasTypeOfParent(node.parent, type);
     };
+
+    const padChar = insertSpaces ? " " : "\t";
 
     const padLeft = (str: string, len: number, char: string) =>
       char.repeat(len) + str;
@@ -167,11 +177,14 @@ export class NQL {
           if (checkIfNodeHasTypeOfParent(node, "expression")) {
             return text;
           }
-          return padLeftNewLine(padLeftSpace(text, 2));
+          return padLeftNewLine(padLeft(text, tabSize, padChar));
         case "time_frame":
-          return padLeftNewLine(padLeftSpace(text, 2));
+          return padLeftNewLine(padLeft(text, tabSize, padChar));
         case "clause":
-          return padLeftNewLine(node.children.map(joinLeafNodes).join(""), 2);
+          return padLeftNewLine(
+            node.children.map(joinLeafNodes).join(""),
+            tabSize,
+          );
         case "compute_clause":
         case "include_clause":
         case "list_clause":
@@ -183,16 +196,16 @@ export class NQL {
         case "with_clause":
           return padLeftSpace(node.children.map(joinLeafNodes).join(""));
         case "table":
-          return padLeftNewLine(padLeftSpace(text, 2));
+          return padLeftNewLine(padLeft(text, tabSize, padChar));
         case "and":
         case "or":
-          return padLeftNewLine(padLeftSpace(text, 2));
+          return padLeftNewLine(padLeft(text, tabSize, padChar));
         case "by":
-          return padLeftNewLine(padLeftSpace(padRightSpace(text), 2));
+          return padLeftNewLine(padLeft(padRightSpace(text), tabSize, padChar));
         case "limit":
           return padRightSpace(text);
         case "sort_order":
-          return padLeftNewLine(padLeftSpace(text, 2));
+          return padLeftNewLine(padLeft(text, tabSize, padChar));
         case "alias":
         case "division":
         case "equals":
