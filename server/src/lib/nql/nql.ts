@@ -151,6 +151,22 @@ export class NQL {
       return checkIfNodeHasTypeOfParent(node.parent, type);
     };
 
+    const getNodeOfTypeDepth = (
+      node: Parser.SyntaxNode,
+      type: string,
+      depth = 1,
+    ): number => {
+      if (!node.parent) {
+        return depth;
+      }
+
+      if (node.parent.type === type) {
+        return getNodeOfTypeDepth(node.parent, type, depth + 1);
+      }
+
+      return getNodeOfTypeDepth(node.parent, type, depth);
+    };
+
     const padChar = insertSpaces ? " " : "\t";
 
     const padLeft = (str: string, len: number, char: string) =>
@@ -229,6 +245,16 @@ export class NQL {
           return padRightSpace(text);
         case "pipe":
           return text;
+        case "expression_parenthesized_expression":
+          // eslint-disable-next-line no-case-declarations
+          const depth = getNodeOfTypeDepth(node, node.type, 1);
+          return padLeftNewLine(
+            padLeft(
+              node.children.map(joinLeafNodes).join(""),
+              depth * 2,
+              padChar,
+            ),
+          );
       }
 
       if (!node.children.length) {
