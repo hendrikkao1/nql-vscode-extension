@@ -86,12 +86,27 @@ export class NQL {
           case "int":
           case "string":
           case "table":
-          case "aggregate_function":
           case "aggregate_field":
           case "field_property":
           case "byte":
             tokens.push({
               type: child.type,
+              startPosition: child.startPosition,
+              endPosition: child.endPosition,
+              text: child.text,
+              modifiers: [],
+            });
+            break;
+          case "avg":
+          case "count_if":
+          case "count":
+          case "last":
+          case "max":
+          case "min":
+          case "sum_if":
+          case "sum":
+            tokens.push({
+              type: "aggregate_function",
               startPosition: child.startPosition,
               endPosition: child.endPosition,
               text: child.text,
@@ -215,6 +230,9 @@ export class NQL {
           return padLeftNewLine(padLeft(text, tabSize, padChar));
         case "and":
         case "or":
+          if (checkIfNodeHasTypeOfParent(node, "aggregate_function")) {
+            return padRightSpace(padLeftSpace(text));
+          }
           return padLeftNewLine(padLeft(text, tabSize, padChar));
         case "by":
           return padLeftNewLine(padLeft(padRightSpace(text), tabSize, padChar));
